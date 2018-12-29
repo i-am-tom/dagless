@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeOperators       #-}
 module Test.Energy where
 
-import Dagless                     (DaglessT', Witness, persist, root', using)
+import Dagless                     (DaglessT', Witness, compute', persist, using)
 import Data.HDagF                  (In)
 import Data.HList                  (HList (..), PluckedFrom (..))
 import Language.Haskell.DoNotation ((>>=), pure, return)
@@ -36,7 +36,7 @@ type Input = '[ Acceleration, Mass, Displacement ]
 -- monad.
 
 main :: Monad m => HList Input -> m Energy
-main collection = root' do
+main collection = compute' do
     mass         <- fetch @Mass
     acceleration <- fetch @Acceleration
 

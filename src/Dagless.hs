@@ -17,6 +17,54 @@ Stability   : experimental
 
 @Dagless@ is a module for building directed, acyclic graph computations using
 indexed monads. See the @test@ directory for in-depth examples!
+
+We mentioned the following DAG that we wished to express in `Data.HDagF`:
+
+@
+  TypeInType
+    |
+    +-- PolyKinds
+    |     |
+    +---- +-- KindSignatures
+    |
+    +-- DataKinds
+@
+
+Sadly, the raw 'HDagF' interface made this quite ugly. However, we can produce
+much cleaner results with our DSL. Starting with the types:
+
+@
+  data DataKinds      = DataKinds
+  data KindSignatures = KindSignatures
+  data PolyKinds      = PolyKinds
+  data TypeInType     = TypeInType
+@
+
+We'll use the magic of `do-notation` to avoid any hassle with indexed monads:
+
+@
+  {-# LANGUAGE DataKinds, RebindableSyntax #-}
+  import Prelude hiding ((>>=), (>>), pure, return)
+  import qualified Language.Haskell.DoNotation
+@
+
+We can now build the DAG using the monadic interface:
+
+@
+  typeInType :: m (HDagF f '[TypeInType, PolyKinds, DataKinds, KindSignatures])
+  typeInType = graph $ do
+    ks <- persist (pure KindSignatures)
+    dk <- persist (pure DataKinds)
+
+    pk <- using ks \_ ->
+      pure PolyKinds
+
+    using (pk, ks, dk) \_ ->
+      pure TypeInType
+@
+
+Much neater!
+-
 -}
 module Dagless
   ( module T

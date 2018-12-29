@@ -11,7 +11,7 @@ module Test.Async where
 import Control.Concurrent          (threadDelay)
 import Control.Concurrent.Async    (concurrently)
 import Control.Monad.Indexed.Trans (ilift)
-import Dagless                     (DaglessT', In, Witness, persist, root', using)
+import Dagless                     (DaglessT', In, Witness, compute', persist, using)
 import Data.Coerce                 (coerce, Coercible)
 import Language.Haskell.DoNotation ((>>=), (>>), pure, return)
 import Prelude                     hiding ((>>=), (>>), pure, return)
@@ -41,7 +41,7 @@ data Result = TeamA | TeamB | Draw
   deriving Eq
 
 main :: Int -> Int -> Int -> Int -> IO Result
-main x1 x2 x3 x4 = root' do
+main x1 x2 x3 x4 = compute' do
   -- We register all 4 as things we need. I've called it 'mimic' because it's
   -- just mimicking network delay, and not actually calculating anything.
 
@@ -73,12 +73,9 @@ main x1 x2 x3 x4 = root' do
 
     -- Mimic some server delay. We'll sleep for a random number of
     -- milliseconds, then yield the original value.
-
     mimic
-      :: forall x xs
-       . (Coercible x Int, x `In` xs ~ False)
-      => Int
-      -> DaglessT' IO xs (x ': xs) (Witness x)
+      :: forall x xs. (Coercible x Int, x `In` xs ~ False)
+      => Int -> DaglessT' IO xs (x ': xs) (Witness x)
 
     mimic x = do
       sleep <- ilift randomIO

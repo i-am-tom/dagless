@@ -80,12 +80,18 @@ type Dagless' pre post a
 -- Note the two contexts: the transformer context @m@, and the DAG computation
 -- context @f@.
 
-root :: (Functor f, Functor m) => DaglessT f m '[] (x ': xs) a -> m (f x)
-root = fmap (evaluate . snd) . (`runIxStateT` HEmptyF) . runDaglessT
+compute :: (Functor f, Functor m) => DaglessT f m '[] (x ': xs) a -> m (f x)
+compute = fmap (evaluate . snd) . (`runIxStateT` HEmptyF) . runDaglessT
 
--- | When the two contexts are identical, 'root' returns two layers of context
--- unnecessarily. This function takes a 'DaglessT'', and calls 'join' on the
--- result of 'root'. We edge closer and closer to the Fairbairn threshold.
+-- | When the two contexts are identical, 'compute' returns two layers of
+-- context unnecessarily. This function takes a 'DaglessT'', and calls 'join'
+-- on the result of 'compute'. We edge closer and closer to the Fairbairn
+-- threshold.
 
-root' :: Monad m => DaglessT' m '[] (x ': xs) a -> m x
-root' = join . root
+compute' :: Monad m => DaglessT' m '[] (x ': xs) a -> m x
+compute' = join . compute
+
+-- | Extract the 'HDagF' from a 'DaglessT' transformer.
+
+graph :: Functor m => DaglessT f m '[] xs a -> m (HDagF f xs)
+graph = fmap snd . (`runIxStateT` HEmptyF) . runDaglessT

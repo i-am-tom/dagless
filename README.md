@@ -15,3 +15,28 @@ transformer](http://hackage.haskell.org/package/indexed-extras/docs/Control-Mona
 to keep track of updates to the graph. When combined with the fabulous
 [`do-notation`](http://hackage.haskell.org/package/do-notation) package,
 however, this implementation detail is neatly hidden away!
+
+---
+
+See the [Test](https://github.com/i-am-tom/dagless/tree/master/test/Test)
+directory for fully-worked examples!
+
+```haskell
+main collection = compute' do
+  mass         <- fetch @Mass
+  acceleration <- fetch @Acceleration
+
+  force <- using (mass, acceleration) $ \(m, a) -> do
+    Mass         m' <- m
+    Acceleration a' <- a
+
+    pure (Force (m' * a'))
+
+  displacement <- fetch @Displacement
+
+  using (force, displacement) $ \(f, d) -> do
+    Force        f' <- f
+    Displacement d' <- d
+
+    pure (Energy (f' * d'))
+```
