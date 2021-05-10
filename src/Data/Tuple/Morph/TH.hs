@@ -37,7 +37,7 @@ mkHListP []       = ConP (mkName "HNil") []
 
 -- | The tuple expression.
 mkTupleE :: [Name] -> Exp
-mkTupleE = TupE . fmap VarE
+mkTupleE = TupE . fmap (Just . VarE)
 
 -- | The HList expression.
 mkHListE :: [Name] -> Exp
